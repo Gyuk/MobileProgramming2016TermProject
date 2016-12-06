@@ -6,27 +6,24 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -36,19 +33,17 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by admin on 2016-11-27.
+ * Created by admin on 2016-12-06.
  */
-public class AddDaily extends Activity {
-    private static final int MARK_MANUAL_MAP = 0;
+public class ModifyEvent extends Activity {
     private static final int PICK_FROM_ALBUM = 1;
-    private static final int PICK_FROM_CAMERA =2;
+    private static final int MAP_PICK = 2;
 
 
-
-
-    static DataBaseOpen dataBaseOpen;
+    static EventDataBase dataBaseOpen;
     static SQLiteDatabase db;
 
+    int id;
     double latitude = 0;
     double longitude = 0;
 
@@ -57,16 +52,8 @@ public class AddDaily extends Activity {
     int sYear = 0;
     int sMonth= 0, sDay = 0, sHour= 0,sMinute= 0;
     private String dateString, timeString;
-    private String type, title, detail;
-
-
-    // 카메라 관련
-    private String url= "사진없음";
-    private Uri mImageCaptureUri;
-    private ImageView mPhotoImageView;
-    private String folder = "Daily";
-    private String filename;
-
+    private String title, detail;
+    private String picturekey;
 
     private MyLocation location; // 위치사용
     Spinner dailytype;      // 일상 스피너
@@ -78,22 +65,28 @@ public class AddDaily extends Activity {
     Button completebtn;
     Button detailbtn;
     Button titlebtn;
-
-    Button camerabtn;
+    Button albumbtn;
     TextView picfileView;
+
 
     Intent intent;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_adddaily);
+        setContentView(R.layout.activity_modifyevent);
 
-        dataBaseOpen = new DataBaseOpen(this);
+        dataBaseOpen = new EventDataBase(this);
         db = dataBaseOpen.getWritableDatabase();
 
-        dailytype = (Spinner) findViewById(R.id.spinner);   //일상 스피너
-        ArrayAdapter dailyadpater = ArrayAdapter.createFromResource(this, R.array.type, android.R.layout.simple_spinner_item);
-        dailyadpater.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        dailytype.setAdapter(dailyadpater);
+        intent = getIntent();
+        id = intent.getIntExtra("ID_KEY", 0);
+        dateString = intent.getStringExtra("DATE_KEY");
+        timeString = intent.getStringExtra("TIME_KEY");
+        addressString = intent.getStringExtra("ADDRESS_KEY");
+        latitude =  intent.getDoubleExtra("LATITUDE_KEY", 0.00);
+        longitude = intent.getDoubleExtra("LONGITUDE_KEY", 0.00);
+        title = intent.getStringExtra("TITLE_KEY");
+        detail = intent.getStringExtra("DETAIL_KEY");
+        picturekey = intent.getStringExtra("PICTURE_KEY");
 
 
         locationcheck = (CheckBox) (findViewById(R.id.LocationCheck));
@@ -104,11 +97,8 @@ public class AddDaily extends Activity {
         completebtn = (Button) findViewById(R.id.completebtn);
         detailbtn = (Button) findViewById(R.id.alert2);
         titlebtn = (Button) findViewById(R.id.alert1);
-        camerabtn = (Button) findViewById(R.id.albumbtn);
-
+        albumbtn = (Button) findViewById(R.id.albumbtn);
         picfileView = (TextView) findViewById(R.id.picfileView);
-        //iv = (ImageView)findViewById(R.id.iv);
-
 
         GregorianCalendar cal = new GregorianCalendar();
         mYear = cal.get(Calendar.YEAR);
@@ -117,48 +107,33 @@ public class AddDaily extends Activity {
         mHour = cal.get(Calendar.HOUR_OF_DAY);
         mMinute = cal.get(Calendar.MINUTE);
 
-        intent = getIntent();
-
-
-        // 카메라창
         findViewById(R.id.albumbtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stu
+                // TODO Auto-generated method stub
 
-                AlertDialog.Builder alert = new AlertDialog.Builder(AddDaily.this).setTitle("사진 찍기");
-
-                alert.setMessage(url);
-
-                alert.setPositiveButton("사진촬영", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        doTakePhotoAction();
-                        //Toast.makeText(getApplicationContext(), url, Toast.LENGTH_SHORT).show();
-                    }
-                });
-                alert.setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        Toast.makeText(getApplicationContext(), url, Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-                alert.show();
-
+                //이미지 선택
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivityForResult(intent, PICK_FROM_ALBUM);
 
 
             }
         });
+
+
 
         /*title 입력 하는 팝업창*/
         findViewById(R.id.alert1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                AlertDialog.Builder alert = new AlertDialog.Builder(AddDaily.this);
+                AlertDialog.Builder alert = new AlertDialog.Builder(ModifyEvent.this);
 
                 alert.setTitle("제목 입력");
                 alert.setMessage("Title 입력");
-                final EditText Title = new EditText(AddDaily.this);
+                final EditText Title = new EditText(ModifyEvent.this);
                 alert.setView(Title);
 
                 alert.setPositiveButton("ok", new DialogInterface.OnClickListener() {
@@ -168,7 +143,7 @@ public class AddDaily extends Activity {
                 });
                 alert.setNegativeButton("no", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        title = "";
+                        dialog.dismiss();
                     }
                 });
                 alert.show();
@@ -181,11 +156,11 @@ public class AddDaily extends Activity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                AlertDialog.Builder alert = new AlertDialog.Builder(AddDaily.this);
+                AlertDialog.Builder alert = new AlertDialog.Builder(ModifyEvent.this);
 
                 alert.setTitle("내용 입력");
                 alert.setMessage("Detail입력");
-                final EditText Detail = new EditText(AddDaily.this);
+                final EditText Detail = new EditText(ModifyEvent.this);
                 alert.setView(Detail);
 
                 alert.setPositiveButton("ok", new DialogInterface.OnClickListener() {
@@ -195,7 +170,8 @@ public class AddDaily extends Activity {
                 });
                 alert.setNegativeButton("no", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        dialog.dismiss();                    }
+                        dialog.dismiss();
+                    }
                 });
                 alert.show();
 
@@ -208,12 +184,11 @@ public class AddDaily extends Activity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 addressString = getAddress(latitude, longitude);
-                type = dailytype.getSelectedItem().toString();
-                String msg =title+ "\n" + detail +"\n" +type+"\n"+ dateString+"\n"+timeString+"\n"+addressString+"위도: " + latitude+ "경도: "+ longitude;
+                //type = dailytype.getSelectedItem().toString();
+                //String msg =title+ "\n" + detail +"\n" +type+"\n"+ dateString+"\n"+timeString+"\n"+addressString+"위도: " + latitude+ "경도: "+ longitude;
                 //Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 
-                insertData(dateString, timeString, addressString, latitude, longitude, type, title, detail, url);
-
+                modifyData(id, dateString, timeString, addressString, latitude, longitude, title, detail, picturekey);
                 setResult(RESULT_OK, intent);
 
                 finish();
@@ -224,7 +199,7 @@ public class AddDaily extends Activity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                new DatePickerDialog(AddDaily.this, dateSetListener, mYear, mMonth, mDay).show();
+                new DatePickerDialog(ModifyEvent.this, dateSetListener, mYear, mMonth, mDay).show();
                 dateString = Integer.toString(sYear) + "년 " + Integer.toString(sMonth) + "월 " + Integer.toString(sDay) + "일";
 
             }
@@ -234,7 +209,7 @@ public class AddDaily extends Activity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                new TimePickerDialog(AddDaily.this, timeSetListener, mHour, mMinute, false).show();
+                new TimePickerDialog(ModifyEvent.this, timeSetListener, mHour, mMinute, false).show();
                 timeString = Integer.toString(sHour) + "시 " + Integer.toString(sMinute) + "분";
 
             }
@@ -245,9 +220,10 @@ public class AddDaily extends Activity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-
-                Intent mapIntent = new Intent(AddDaily.this, ManualMap.class);
-                startActivityForResult(mapIntent, MARK_MANUAL_MAP);
+                Intent mapIntent = new Intent(ModifyEvent.this, ManualMap.class);
+                startActivityForResult(mapIntent, MAP_PICK);
+                //latitude = mapIntent.getDoubleExtra("LATITUDE_KEY", 2);
+                //longitude = mapIntent.getDoubleExtra("LONGITUDE_KEY", 2);
 
             }
         });
@@ -259,7 +235,7 @@ public class AddDaily extends Activity {
                 // TODO Auto-generated method stub
                 if(isChecked){
                     locationbtn.setEnabled(false);
-                    location =new MyLocation(AddDaily.this);
+                    location =new MyLocation(ModifyEvent.this);
                     if (location.isGetLocation()) {
                         //위치
                         latitude = location.getLatitude();
@@ -272,6 +248,7 @@ public class AddDaily extends Activity {
                         latitude = 0;
                         longitude = 0;
                         location.showSettingsAlert();
+
                     }
                 }
                 else{
@@ -305,75 +282,38 @@ public class AddDaily extends Activity {
 
 
     }
-    private void doTakeAlbumAction()
-    {
-        // 앨범 호출
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
-        startActivityForResult(intent, PICK_FROM_ALBUM);
-    }
-
-    private void doTakePhotoAction()
-    {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-
-        //저장할 파일 설정
-        //외부 저장소 경로
-        filename = title+"_"+dateString;
-        String path = Environment.getExternalStorageDirectory().getAbsolutePath();
-
-        //폴더명 및 파일명
-        //String folderPath = path + File.separator + folder;
-
-
-        //  File.separator는  / 슬래시 표시와 같다
-        url = path + File.separator + folder + File.separator +  filename + ".jpg";
-
-
-        // 저장 폴더 지정 및 폴더 생성
-        //File fileFolderPath = new File(folderPath);
-        //fileFolderPath.mkdir();
-
-
-        mImageCaptureUri = Uri.fromFile(new File( url));
-
-
-        // 임시로 사용할 파일의 경로를 생성
-        //url = "tmp_" + dateString+" "+ timeString + ".jpg";
-        //mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(), url));
-
-        intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
-        // 특정기기에서 사진을 저장못하는 문제가 있어 다음을 주석처리 합니다.
-        //intent.putExtra("return-data", true);
-        startActivityForResult(intent, PICK_FROM_CAMERA);
-    }
-
-
-
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode != RESULT_OK){
-            return;
-        }
-        switch (requestCode){
-            case MARK_MANUAL_MAP:
-            {
-                latitude = data.getDoubleExtra("LATITUDE_KEY",0.00);
-                longitude = data.getDoubleExtra("LONGITUDE_KEY",0.00);
-            }
-            case PICK_FROM_CAMERA:
-            {
-                picfileView.setText(url);
-                Toast.makeText(getApplicationContext(), url, Toast.LENGTH_SHORT).show();
+
+        if(resultCode == RESULT_OK){
+            if(requestCode == PICK_FROM_ALBUM){
+
+                // URi를 이용하여 해당 파일의 절대 경로를 구하기
+                Uri uri = data.getData();
+                String[] filePathColumn = { MediaStore.Images.Media.DATA };
+
+                Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
+                cursor.moveToFirst();
+
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                String picturePath = cursor.getString(columnIndex);
+                cursor.close();
+
+                // picturekey 수정 / 이미지 경로가 바뀌었다
+                picturekey = picturePath;
+
+                picfileView.setText(picturekey);
 
             }
+            else if(requestCode == MAP_PICK){
+                latitude =  data.getDoubleExtra("LATITUDE_KEY", 0.00);
+                longitude = data.getDoubleExtra("LONGITUDE_KEY", 0.00);
+            }
         }
-
-
 
     }
+
 
     private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
 
@@ -401,19 +341,19 @@ public class AddDaily extends Activity {
     };
 
 
-    public void insertData(String date, String time,
-                           String address,  double latitude, double longitude, String type, String title, String detail, String picturekey) {
-        db.execSQL("INSERT INTO t_table "
-                + "VALUES(NULL, '" + date
-                + "', '" + time
-                + "', '" + address
-                + "', '" + latitude
-                + "', '" + longitude
-                + "', '" + type
-                + "', '" + title
-                + "', '" + detail
-                + "', '" + picturekey
-                + "');");
+    public void modifyData(int id, String date, String time,
+                           String address,  double latitude, double longitude, String title, String detail, String picturekey) {
+        db.execSQL("UPDATE e_table SET "+
+                        "date = '"+date+"', "+
+                        "time = '"+ time+"', "+
+                        "address = '"+ address+"', "+
+                        "latitude = '"+ latitude+"', "+
+                        "longitude = '"+ longitude+"', "+
+                        "title = '"+ title+"', "+
+                        "detail = '"+ detail+"', "+
+                        "picturekey = '"+ picturekey+
+                        "' WHERE id = '"+ id + "' ;"
+        );
     }
 
     public String getAddress(double latitude, double longitude) {
@@ -434,5 +374,7 @@ public class AddDaily extends Activity {
         }
         return str;
     }
+
+
 
 }

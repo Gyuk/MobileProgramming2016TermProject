@@ -6,10 +6,13 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -18,6 +21,7 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -33,6 +37,9 @@ import java.util.Locale;
  * Created by admin on 2016-11-28.
  */
 public class ModifyDaily extends Activity{
+    private static final int PICK_FROM_ALBUM = 1;
+    private static final int MAP_PICK = 2;
+
     static DataBaseOpen dataBaseOpen;
     static SQLiteDatabase db;
 
@@ -58,6 +65,10 @@ public class ModifyDaily extends Activity{
     Button completebtn;
     Button detailbtn;
     Button titlebtn;
+    Button albumbtn;
+    TextView picfileView;
+
+
     Intent intent;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +106,8 @@ public class ModifyDaily extends Activity{
         completebtn = (Button) findViewById(R.id.completebtn);
         detailbtn = (Button) findViewById(R.id.alert2);
         titlebtn = (Button) findViewById(R.id.alert1);
+        albumbtn = (Button) findViewById(R.id.albumbtn);
+        picfileView = (TextView) findViewById(R.id.picfileView);
 
         GregorianCalendar cal = new GregorianCalendar();
         mYear = cal.get(Calendar.YEAR);
@@ -102,6 +115,24 @@ public class ModifyDaily extends Activity{
         mDay  = cal.get(Calendar.DAY_OF_MONTH);
         mHour = cal.get(Calendar.HOUR_OF_DAY);
         mMinute = cal.get(Calendar.MINUTE);
+
+        findViewById(R.id.albumbtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+
+                //이미지 선택
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivityForResult(intent, PICK_FROM_ALBUM);
+
+
+
+
+            }
+        });
+
 
 
         /*title 입력 하는 팝업창*/
@@ -168,7 +199,7 @@ public class ModifyDaily extends Activity{
                 //String msg =title+ "\n" + detail +"\n" +type+"\n"+ dateString+"\n"+timeString+"\n"+addressString+"위도: " + latitude+ "경도: "+ longitude;
                 //Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 
-                modifyData(id, dateString, timeString, addressString, latitude, longitude, type, title, detail);
+                modifyData(id, dateString, timeString, addressString, latitude, longitude, type, title, detail, picturekey);
                 setResult(RESULT_OK, intent);
 
                 finish();
@@ -201,7 +232,7 @@ public class ModifyDaily extends Activity{
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 Intent mapIntent = new Intent(ModifyDaily.this, ManualMap.class);
-                startActivityForResult(mapIntent, 2);
+                startActivityForResult(mapIntent, MAP_PICK);
                //latitude = mapIntent.getDoubleExtra("LATITUDE_KEY", 2);
                 //longitude = mapIntent.getDoubleExtra("LONGITUDE_KEY", 2);
 
@@ -265,10 +296,35 @@ public class ModifyDaily extends Activity{
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        latitude =  data.getDoubleExtra("LATITUDE_KEY", 0.00);
-        longitude = data.getDoubleExtra("LONGITUDE_KEY", 0.00);
+        if(resultCode == RESULT_OK){
+            if(requestCode == PICK_FROM_ALBUM){
+
+
+                // URi를 이용하여 해당 파일의 절대 경로를 구하기
+                Uri uri = data.getData();
+                String[] filePathColumn = { MediaStore.Images.Media.DATA };
+
+                Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
+                cursor.moveToFirst();
+
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                String picturePath = cursor.getString(columnIndex);
+                cursor.close();
+
+                // picturekey 수정 / 이미지 경로가 바뀌었다
+                picturekey = picturePath;
+
+                picfileView.setText(picturekey);
+
+            }
+            else if(requestCode == MAP_PICK){
+                latitude =  data.getDoubleExtra("LATITUDE_KEY", 0.00);
+                longitude = data.getDoubleExtra("LONGITUDE_KEY", 0.00);
+            }
+        }
 
     }
+
 
     private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
 
@@ -296,6 +352,8 @@ public class ModifyDaily extends Activity{
     };
 
 
+
+
     public void insertData(String date, String time,
                            String address,  double latitude, double longitude, String type, String title, String detail) {
         db.execSQL("INSERT INTO t_table "
@@ -311,7 +369,7 @@ public class ModifyDaily extends Activity{
                 + "');");
     }
     public void modifyData(int id, String date, String time,
-                           String address,  double latitude, double longitude, String type, String title, String detail) {
+                           String address,  double latitude, double longitude, String type, String title, String detail, String picturekey) {
         db.execSQL("UPDATE t_table SET "+
                         "date = '"+date+"', "+
                         "time = '"+ time+"', "+

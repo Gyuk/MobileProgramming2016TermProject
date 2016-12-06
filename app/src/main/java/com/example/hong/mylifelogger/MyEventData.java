@@ -1,30 +1,27 @@
 package com.example.hong.mylifelogger;
 
 /**
- * Created by admin on 2016-11-26.
+ * Created by admin on 2016-12-06.
  */
-public class MyData {
+public class MyEventData  {
     private int id;
     private String date;
     private String time;
     private String address;
-    private String type;
-    private String title;
-    private String detail;
+    private String etitle;
+    private String edetail;
     private double latitude;
     private double longitude;
     private String picturekey;
 
-
-    public MyData(int i, String d, String t, String ad, double latitude, double longitude,  String ty, String ti,
-           String de, String pk){
+    public MyEventData(int i, String d, String t, String ad, double latitude, double longitude, String ti,
+                  String de, String pk){
         id = i;
         date = d;
         time = t;
         address = ad;
-        type = ty;
-        title = ti;
-        detail = de;
+        etitle = ti;
+        edetail = de;
         this.latitude = latitude;
         this.longitude = longitude;
         picturekey = pk;
@@ -39,14 +36,13 @@ public class MyData {
     public String getAddress() {
         return address;
     }
-    public String getType() { return type;}
 
     public void setText(String text) {
-        this.title = text ;
+        this.etitle = text ;
     }
 
-    public String getTitle() {return this.title;}
-    public String getDetail() { return detail;}
+    public String getTitle() {return this.etitle;}
+    public String getDetail() { return edetail;}
     public double getLatitude(){  return latitude;    }
     public double getLongitude(){
         return longitude;
@@ -57,7 +53,8 @@ public class MyData {
         return "ID: "+ id+ "\n"+
                 date + " " + time +"\n" +
                 "주소: "+getAddress() + "\n" +
-                "일상 종류 : " +  type+"\n" +
-                "내용:" +  detail;
+                "이벤트내용:" +  edetail;
     }
+
+
 }

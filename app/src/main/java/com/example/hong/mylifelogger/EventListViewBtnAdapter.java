@@ -15,12 +15,12 @@ import java.io.File;
 import java.util.ArrayList;
 
 /**
- * Created by admin on 2016-11-26.
+ * Created by admin on 2016-12-06.
  */
-public class ListViewBtnAdapter extends ArrayAdapter implements View.OnClickListener{
+public class EventListViewBtnAdapter extends ArrayAdapter implements View.OnClickListener {
     private static final  int  SERVER_OTHER_SEARCH = 1;
 
-    static DataBaseOpen dataBaseOpen;
+    static EventDataBase eventDataBase;
     static SQLiteDatabase db;
     Intent intent;
 
@@ -35,7 +35,8 @@ public class ListViewBtnAdapter extends ArrayAdapter implements View.OnClickList
 
 
     // ListViewBtnAdapter 생성자. 마지막에 ListBtnClickListener 추가.
-    ListViewBtnAdapter(Context context, int resource, ArrayList<MyData> list, ListBtnClickListener clickListener) {
+
+    EventListViewBtnAdapter(Context context, int resource, ArrayList<MyEventData> list, ListBtnClickListener clickListener) {
         super(context, resource, list) ;
 
         // resource id 값 복사. (super로 전달된 resource를 참조할 방법이 없음.)
@@ -58,10 +59,10 @@ public class ListViewBtnAdapter extends ArrayAdapter implements View.OnClickList
         final TextView textTextView = (TextView) convertView.findViewById(R.id.textView1);
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
-        final MyData data = (MyData) getItem(position);
+        final MyEventData data = (MyEventData) getItem(position);
 
         // 아이템 내 각 위젯에 데이터 반영
-       // textTextView.setText(listViewItem.getText());
+        // textTextView.setText(listViewItem.getText());
         textTextView.setText(data.getTitle());
 
 
@@ -69,15 +70,14 @@ public class ListViewBtnAdapter extends ArrayAdapter implements View.OnClickList
         modify.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 //textTextView.setText(Integer.toString(pos + 1) + "번 아이템 선택.");
-                Intent intent = new Intent(parent.getContext(), ModifyDaily.class);
-               // intent = new Intent(v.getContext(), ModifyDaily.class);
+                Intent intent = new Intent(parent.getContext(), ModifyEvent.class);
+                // intent = new Intent(v.getContext(), ModifyDaily.class);
                 intent.putExtra("ID_KEY", data.getId());
                 intent.putExtra("DATE_KEY", data.getDate());
                 intent.putExtra("TIME_KEY", data.getTime());
                 intent.putExtra("ADDRESS_KEY", data.getAddress());
                 intent.putExtra("LATITUDE_KEY", data.getLatitude());
                 intent.putExtra("LONGITUDE_KEY", data.getLongitude());
-                intent.putExtra("TYPE_KEY", data.getType());
                 intent.putExtra("TITLE_KEY", data.getTitle());
                 intent.putExtra("DETAIL_KEY", data.getDetail());
                 intent.putExtra("PICTURE_KEY", data.getPicturekey());
@@ -120,11 +120,8 @@ public class ListViewBtnAdapter extends ArrayAdapter implements View.OnClickList
                 intent = new Intent(parent.getContext(), SimpleMap.class);
                 intent.putExtra("LATITUDE_KEY", data.getLatitude());
                 intent.putExtra("LONGITUDE_KEY", data.getLongitude());
-                intent.putExtra("TYPE_KEY", data.getType());
                 intent.putExtra("TITLE_KEY", data.getTitle());
                 parent.getContext().startActivity(intent);
-
-
 
             }
         });
@@ -144,7 +141,5 @@ public class ListViewBtnAdapter extends ArrayAdapter implements View.OnClickList
         }
 
     }
-
-
 
 }

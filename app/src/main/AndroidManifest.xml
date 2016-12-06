@@ -40,7 +40,13 @@
         <activity android:name=".ManualMap"></activity>
         <activity android:name=".SimpleMap"></activity>
         <activity android:name=".ModifyDaily"></activity>
-        <activity android:name=".Camera"></activity>
+
+        <activity android:name=".WriteEvent"></activity>
+        <activity android:name=".AddEvent"></activity>
+        <activity android:name=".ModifyEvent"></activity>
+
+        <activity android:name=".Statistic"></activity>
+
         <uses-library android:name="com.google.android.maps"/>
 
 

@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/spring2"
+    android:background="@drawable/summer2"
     android:weightSum="1">
 
     <CheckBox
@@ -11,7 +11,7 @@
         android:text="현재위치사용"
         android:id="@+id/LocationCheck"
         android:checked="false"
-        android:layout_marginTop="84dp"
+        android:layout_marginTop="80dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
@@ -43,7 +43,9 @@
         android:layout_weight="0.13"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/TimeCheck"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/completebtn"
+        android:layout_toStartOf="@+id/completebtn" />
 
     <Button
         android:layout_width="wrap_content"
@@ -60,48 +62,34 @@
         android:layout_height="wrap_content"
         android:text="시간"
         android:id="@+id/timebtn"
-        android:layout_alignTop="@+id/datebtn"
+        android:layout_below="@+id/TimeCheck"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_toRightOf="@+id/completebtn"
+        android:layout_toEndOf="@+id/completebtn" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="일상 종류선택"
-        android:id="@+id/dailytxt"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
 
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/spinner"
-        android:layout_below="@+id/dailytxt"
-        android:layout_toLeftOf="@+id/completebtn"
-        android:layout_toStartOf="@+id/completebtn" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="내용 입력"
         android:id="@+id/alert2"
-        android:layout_below="@+id/spinner"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_toRightOf="@+id/completebtn"
-        android:layout_toEndOf="@+id/completebtn" />
+        android:layout_below="@+id/timebtn"
+        android:layout_alignLeft="@+id/timebtn"
+        android:layout_alignStart="@+id/timebtn" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="제목 입력"
         android:id="@+id/alert1"
-        android:layout_below="@+id/spinner"
-        android:layout_alignRight="@+id/spinner"
-        android:layout_alignEnd="@+id/spinner"
+        android:layout_alignTop="@+id/alert2"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/datebtn"
+        android:layout_alignEnd="@+id/datebtn" />
 
     <Button
         android:layout_width="wrap_content"
@@ -109,8 +97,9 @@
         android:text="사진추가"
         android:id="@+id/albumbtn"
         android:layout_above="@+id/completebtn"
-        android:layout_alignRight="@+id/alert2"
-        android:layout_alignEnd="@+id/alert2" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="54dp" />
 
     <TextView
         android:layout_width="wrap_content"

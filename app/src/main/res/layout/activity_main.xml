@@ -10,15 +10,59 @@
     tools:context="com.example.hong.mylifelogger.MainActivity">
 
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="92dp"
+        android:background="@drawable/spring"
+        android:id="@+id/dailybtn"
+        android:onClick="onClickWriteDaily"
+        android:layout_below="@+id/imageView2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="90dp"
+        android:id="@+id/imageView2"
+        android:background="@drawable/logo"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <Button
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="일상"
-        android:id="@+id/dailybtn"
+        android:layout_height="92dp"
+        android:id="@+id/eventbtn"
+        android:background="@drawable/summer"
+        android:onClick="onClickWriteEvent"
+        android:layout_below="@+id/dailybtn"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:onClick="onClickWriteDaily"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignRight="@+id/dailybtn"
+        android:layout_alignEnd="@+id/dailybtn" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="92dp"
+        android:background="@drawable/fall"
+        android:id="@+id/statisticbtn"
+        android:onClick="onClickStatistic"
+        android:layout_below="@+id/eventbtn"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="92dp"
+        android:background="@drawable/winter"
+        android:id="@+id/sharebtn"
+        android:onClick="onClickShare"
+        android:layout_below="@+id/statisticbtn"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
 </RelativeLayout>

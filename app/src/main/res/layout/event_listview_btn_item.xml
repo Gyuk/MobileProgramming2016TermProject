@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability= "blocksDescendants" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text=""
+        android:id="@+id/textView1"
+        android:textSize="16dp"
+        android:textColor="#000000"
+        android:gravity="center_vertical"
+        android:layout_weight="4" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="수정"
+        android:id="@+id/modibtn"
+        android:layout_gravity="center_vertical"
+        android:onClick="modionClick" />
+
+    <Button
+        android:id="@+id/picturebtn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="Picture" />
+
+    <Button
+        android:id="@+id/mapbtn"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:text="MAP" />
+
+</LinearLayout>

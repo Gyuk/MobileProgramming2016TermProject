@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -36,17 +35,15 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by admin on 2016-11-27.
+ * Created by admin on 2016-12-06.
  */
-public class AddDaily extends Activity {
+public class AddEvent extends Activity{
     private static final int MARK_MANUAL_MAP = 0;
     private static final int PICK_FROM_ALBUM = 1;
     private static final int PICK_FROM_CAMERA =2;
 
 
-
-
-    static DataBaseOpen dataBaseOpen;
+    static EventDataBase dataBaseOpen;
     static SQLiteDatabase db;
 
     double latitude = 0;
@@ -57,7 +54,7 @@ public class AddDaily extends Activity {
     int sYear = 0;
     int sMonth= 0, sDay = 0, sHour= 0,sMinute= 0;
     private String dateString, timeString;
-    private String type, title, detail;
+    private String  title, detail;
 
 
     // 카메라 관련
@@ -83,17 +80,13 @@ public class AddDaily extends Activity {
     TextView picfileView;
 
     Intent intent;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_adddaily);
+        setContentView(R.layout.activity_addevent);
 
-        dataBaseOpen = new DataBaseOpen(this);
+        dataBaseOpen = new EventDataBase(this);
         db = dataBaseOpen.getWritableDatabase();
-
-        dailytype = (Spinner) findViewById(R.id.spinner);   //일상 스피너
-        ArrayAdapter dailyadpater = ArrayAdapter.createFromResource(this, R.array.type, android.R.layout.simple_spinner_item);
-        dailyadpater.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        dailytype.setAdapter(dailyadpater);
 
 
         locationcheck = (CheckBox) (findViewById(R.id.LocationCheck));
@@ -126,7 +119,7 @@ public class AddDaily extends Activity {
             public void onClick(View v) {
                 // TODO Auto-generated method stu
 
-                AlertDialog.Builder alert = new AlertDialog.Builder(AddDaily.this).setTitle("사진 찍기");
+                AlertDialog.Builder alert = new AlertDialog.Builder(AddEvent.this).setTitle("사진 찍기");
 
                 alert.setMessage(url);
 
@@ -154,11 +147,11 @@ public class AddDaily extends Activity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                AlertDialog.Builder alert = new AlertDialog.Builder(AddDaily.this);
+                AlertDialog.Builder alert = new AlertDialog.Builder(AddEvent.this);
 
                 alert.setTitle("제목 입력");
                 alert.setMessage("Title 입력");
-                final EditText Title = new EditText(AddDaily.this);
+                final EditText Title = new EditText(AddEvent.this);
                 alert.setView(Title);
 
                 alert.setPositiveButton("ok", new DialogInterface.OnClickListener() {
@@ -181,11 +174,11 @@ public class AddDaily extends Activity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                AlertDialog.Builder alert = new AlertDialog.Builder(AddDaily.this);
+                AlertDialog.Builder alert = new AlertDialog.Builder(AddEvent.this);
 
                 alert.setTitle("내용 입력");
                 alert.setMessage("Detail입력");
-                final EditText Detail = new EditText(AddDaily.this);
+                final EditText Detail = new EditText(AddEvent.this);
                 alert.setView(Detail);
 
                 alert.setPositiveButton("ok", new DialogInterface.OnClickListener() {
@@ -208,11 +201,11 @@ public class AddDaily extends Activity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 addressString = getAddress(latitude, longitude);
-                type = dailytype.getSelectedItem().toString();
-                String msg =title+ "\n" + detail +"\n" +type+"\n"+ dateString+"\n"+timeString+"\n"+addressString+"위도: " + latitude+ "경도: "+ longitude;
+                //type = dailytype.getSelectedItem().toString();
+               // String msg =title+ "\n" + detail +"\n" +type+"\n"+ dateString+"\n"+timeString+"\n"+addressString+"위도: " + latitude+ "경도: "+ longitude;
                 //Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
 
-                insertData(dateString, timeString, addressString, latitude, longitude, type, title, detail, url);
+                insertData(dateString, timeString, addressString, latitude, longitude, title, detail, url);
 
                 setResult(RESULT_OK, intent);
 
@@ -224,7 +217,7 @@ public class AddDaily extends Activity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                new DatePickerDialog(AddDaily.this, dateSetListener, mYear, mMonth, mDay).show();
+                new DatePickerDialog(AddEvent.this, dateSetListener, mYear, mMonth, mDay).show();
                 dateString = Integer.toString(sYear) + "년 " + Integer.toString(sMonth) + "월 " + Integer.toString(sDay) + "일";
 
             }
@@ -234,7 +227,7 @@ public class AddDaily extends Activity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                new TimePickerDialog(AddDaily.this, timeSetListener, mHour, mMinute, false).show();
+                new TimePickerDialog(AddEvent.this, timeSetListener, mHour, mMinute, false).show();
                 timeString = Integer.toString(sHour) + "시 " + Integer.toString(sMinute) + "분";
 
             }
@@ -246,7 +239,7 @@ public class AddDaily extends Activity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
 
-                Intent mapIntent = new Intent(AddDaily.this, ManualMap.class);
+                Intent mapIntent = new Intent(AddEvent.this, ManualMap.class);
                 startActivityForResult(mapIntent, MARK_MANUAL_MAP);
 
             }
@@ -259,7 +252,7 @@ public class AddDaily extends Activity {
                 // TODO Auto-generated method stub
                 if(isChecked){
                     locationbtn.setEnabled(false);
-                    location =new MyLocation(AddDaily.this);
+                    location =new MyLocation(AddEvent.this);
                     if (location.isGetLocation()) {
                         //위치
                         latitude = location.getLatitude();
@@ -305,13 +298,6 @@ public class AddDaily extends Activity {
 
 
     }
-    private void doTakeAlbumAction()
-    {
-        // 앨범 호출
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
-        startActivityForResult(intent, PICK_FROM_ALBUM);
-    }
 
     private void doTakePhotoAction()
     {
@@ -351,7 +337,6 @@ public class AddDaily extends Activity {
 
 
 
-
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode != RESULT_OK){
@@ -370,7 +355,6 @@ public class AddDaily extends Activity {
 
             }
         }
-
 
 
     }
@@ -402,14 +386,13 @@ public class AddDaily extends Activity {
 
 
     public void insertData(String date, String time,
-                           String address,  double latitude, double longitude, String type, String title, String detail, String picturekey) {
-        db.execSQL("INSERT INTO t_table "
+                           String address,  double latitude, double longitude, String title, String detail, String picturekey) {
+        db.execSQL("INSERT INTO e_table "
                 + "VALUES(NULL, '" + date
                 + "', '" + time
                 + "', '" + address
                 + "', '" + latitude
                 + "', '" + longitude
-                + "', '" + type
                 + "', '" + title
                 + "', '" + detail
                 + "', '" + picturekey
