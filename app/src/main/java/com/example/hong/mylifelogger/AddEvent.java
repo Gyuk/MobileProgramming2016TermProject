@@ -316,19 +316,7 @@ public class AddEvent extends Activity{
         //  File.separator는  / 슬래시 표시와 같다
         url = path + File.separator + folder + File.separator +  filename + ".jpg";
 
-
-        // 저장 폴더 지정 및 폴더 생성
-        //File fileFolderPath = new File(folderPath);
-        //fileFolderPath.mkdir();
-
-
         mImageCaptureUri = Uri.fromFile(new File( url));
-
-
-        // 임시로 사용할 파일의 경로를 생성
-        //url = "tmp_" + dateString+" "+ timeString + ".jpg";
-        //mImageCaptureUri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(), url));
-
         intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
         // 특정기기에서 사진을 저장못하는 문제가 있어 다음을 주석처리 합니다.
         //intent.putExtra("return-data", true);

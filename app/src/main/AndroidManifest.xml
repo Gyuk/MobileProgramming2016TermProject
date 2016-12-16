@@ -50,10 +50,12 @@
         <uses-library android:name="com.google.android.maps"/>
 
 
+        <service android:name=".WalkService"
+            android:enabled="true" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBcYAmeBqe4rXj1QJHykWzmvt5da6FZZoo"/>
+            android:value="AIzaSyAK7giOkBtrY17Vqfchw20o_1TnDSmUcwA"/>
 
     </application>
 

@@ -30,8 +30,6 @@ public class WriteDaily extends Activity implements ListViewBtnAdapter.ListBtnCl
     // 삭제할 데이터의 id 선언
     int ID;
 
-
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_daily);
@@ -48,10 +46,6 @@ public class WriteDaily extends Activity implements ListViewBtnAdapter.ListBtnCl
         adapter = new ListViewBtnAdapter(this, R.layout.listview_btn_item, items,  this);
         listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
-
-
-
-
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {     // 아이템 클릭 이벤트 처리
             @Override
@@ -82,10 +76,6 @@ public class WriteDaily extends Activity implements ListViewBtnAdapter.ListBtnCl
 
                 alert2.setPositiveButton("예", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        //선택된 아이템의 position획득
-                        //int checked = listView.getCheckedItemPosition()+1;
-                        //items.remove(checked);      //삭제
-                        //listView.clearChoices();       // // listview 선택 초기화.
                         int n = items.get(ID).getId();
                         db.execSQL("DELETE FROM t_table WHERE id = " + n + ";");
                         adapter.notifyDataSetChanged();
@@ -169,8 +159,6 @@ public class WriteDaily extends Activity implements ListViewBtnAdapter.ListBtnCl
         Intent intent = new Intent(this, AddDaily.class);
         startActivityForResult(intent, 0);
 
-        //adapter.notifyDataSetChanged();
-        //SetList();
     }
 
     protected void onResume() {
