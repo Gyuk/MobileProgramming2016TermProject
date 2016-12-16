@@ -22,24 +22,36 @@ import java.util.ArrayList;
 public class Statistic extends Activity {
     static DataBaseOpen dataBaseOpen;
     static SQLiteDatabase db;
+    static WalkDataBaseOpen walkDataBaseOpen;
+    static SQLiteDatabase walkdb;
     ArrayList<MyData> arrayList;
+    ArrayList<WalkData> walks;
 
     float[] count  = new float[5];
+    float[] count_walk;
 
     ArrayList<String> labels = new ArrayList<String>();
+    ArrayList<String> walk_labels = new ArrayList<String>();
     ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
+    ArrayList<BarEntry> walk_entries = new ArrayList<BarEntry>();
     BarChart barChart;
+    BarChart barChart2;
 
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistic);
         dataBaseOpen = new DataBaseOpen(this);
+        walkDataBaseOpen = new WalkDataBaseOpen(this);
         db = dataBaseOpen.getWritableDatabase();
+        walkdb = walkDataBaseOpen.getWritableDatabase();
 
         barChart = (BarChart) findViewById(R.id.chart);
-
+        barChart2 = (BarChart) findViewById(R.id.chart2);
         readTable();
+        readWalkTable();
+
+        count_walk = new float[walks.size()];
 
 
         for (int i = 0; i < 5; i++)
@@ -64,6 +76,17 @@ public class Statistic extends Activity {
             }
         }
 
+        for(int i = 0; i < walks.size() ; i++){
+            walk_labels.add(walks.get(i).getDateString().substring(5, 13));
+            count_walk[i] = (float)walks.get(i).getCount();
+            walk_entries.add(new BarEntry(count_walk[i], i));
+        }
+        BarDataSet walkset = new BarDataSet(walk_entries, "# of Calls");
+        walkset.setColors(ColorTemplate.COLORFUL_COLORS);
+        BarData data = new BarData(walk_labels, walkset);
+        barChart2.setData(data);
+        barChart2.setDescription("Description");
+
         labels.add("식사");
         labels.add("공부");
         labels.add("운동");
@@ -82,7 +105,7 @@ public class Statistic extends Activity {
 
         BarDataSet dataset = new BarDataSet(entries, "# of Calls");
         dataset.setColors(ColorTemplate.COLORFUL_COLORS);
-        BarData data = new BarData(labels, dataset);
+        data = new BarData(labels, dataset);
         barChart.setData(data);
         barChart.setDescription("Description");
 
@@ -109,6 +132,21 @@ public class Statistic extends Activity {
             String picturekey = results.getString(9);
 
             arrayList.add(new MyData(id, date, time, address, latitude, longitude,  type, title, detail, picturekey));
+            results.moveToNext();
+        }
+        results.close();
+    }
+    public void readWalkTable() {
+        walks = new ArrayList<WalkData>();
+        String sql = "select * from walk_table";
+        Cursor results = walkdb.rawQuery(sql, null);
+        results.moveToFirst();
+
+        while (!results.isAfterLast()) {
+            int id = results.getInt(0);
+            String date = results.getString(1);
+            double count = results.getDouble(2);
+            walks.add(new WalkData(date,count));
             results.moveToNext();
         }
         results.close();
